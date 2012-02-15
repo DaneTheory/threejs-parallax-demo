@@ -6,8 +6,8 @@ $(document).ready(function() {
   function init(){
     if( Detector.webgl ){
       renderer = new THREE.WebGLRenderer({
-        antialias		: true,	// to get smoother output
-        preserveDrawingBuffer	: true	// to allow screenshot
+        antialias: true, // to get smoother output
+        preserveDrawingBuffer: true // to allow screenshot
       });
       renderer.setClearColorHex( 0xBBBBBB, 1 );
     }else{
@@ -19,55 +19,54 @@ $(document).ready(function() {
 
     // add Stats.js - https://github.com/mrdoob/stats.js
     stats = new Stats();
-    stats.domElement.style.position	= 'absolute';
-    stats.domElement.style.bottom	= '0px';
+    stats.domElement.style.position  = 'absolute';
+    stats.domElement.style.bottom  = '0px';
     document.body.appendChild( stats.domElement );
 
     // create a scene
     scene = new THREE.Scene();
 
     // put a camera in the scene
-    camera	= new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 1, 10000 );
+    camera  = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 1, 10000 );
     camera.position.set(0, 0, 5);
     scene.add(camera);
 
     // create a camera contol
-    cameraControls	= new THREEx.DragPanControls(camera)
+    cameraControls = new THREEx.DragPanControls(camera)
 
-      // transparently support window resize
-      THREEx.WindowResize.bind(renderer, camera);
+    // transparently support window resize
+    THREEx.WindowResize.bind(renderer, camera);
     // allow 'p' to make screenshot
     THREEx.Screenshot.bindKey(renderer);
     // allow 'f' to go fullscreen where this feature is supported
     if( THREEx.FullScreen.available() ){
-      THREEx.FullScreen.bindKey();		
-      document.getElementById('inlineDoc').innerHTML	+= "- <i>f</i> for fullscreen";
+      THREEx.FullScreen.bindKey();
+      document.getElementById('inlineDoc').innerHTML  += "- <i>f</i> for fullscreen";
     }
 
     // here you add your objects
     // - you will most likely replace this part by your own
-    var light	= new THREE.AmbientLight( Math.random() * 0xffffff );
+    var light  = new THREE.AmbientLight( Math.random() * 0xffffff );
     scene.add( light );
-    var light	= new THREE.DirectionalLight( Math.random() * 0xffffff );
+    var light  = new THREE.DirectionalLight( Math.random() * 0xffffff );
     light.position.set( Math.random(), Math.random(), Math.random() ).normalize();
     scene.add( light );
-    var light	= new THREE.DirectionalLight( Math.random() * 0xffffff );
+    var light  = new THREE.DirectionalLight( Math.random() * 0xffffff );
     light.position.set( Math.random(), Math.random(), Math.random() ).normalize();
     scene.add( light );
-    var light	= new THREE.PointLight( Math.random() * 0xffffff );
+    var light  = new THREE.PointLight( Math.random() * 0xffffff );
     light.position.set( Math.random()-0.5, Math.random()-0.5, Math.random()-0.5 )
       .normalize().multiplyScalar(1.2);
     scene.add( light );
-    var light	= new THREE.PointLight( Math.random() * 0xffffff );
+    var light  = new THREE.PointLight( Math.random() * 0xffffff );
     light.position.set( Math.random()-0.5, Math.random()-0.5, Math.random()-0.5 )
       .normalize().multiplyScalar(1.2);
     scene.add( light );
 
-    var geometry	= new THREE.TorusGeometry( 1, 0.42, 16, 16 );
-    var material	= new THREE.MeshLambertMaterial({ambient: 0x808080, color: Math.random() * 0xffffff});
-    var mesh	= new THREE.Mesh( geometry, material ); 
+    var geometry  = new THREE.TorusGeometry( 1, 0.42, 16, 16 );
+    var material  = new THREE.MeshLambertMaterial({ambient: 0x808080, color: Math.random() * 0xffffff});
+    var mesh  = new THREE.Mesh( geometry, material );
     scene.add( mesh );
-
   }
 
   // animation loop
@@ -88,7 +87,7 @@ $(document).ready(function() {
   // render the scene
   function render() {
     // variable which is increase by Math.PI every seconds - usefull for animation
-    var PIseconds	= Date.now() * Math.PI;
+    var PIseconds  = Date.now() * Math.PI;
 
     // update camera controls
     cameraControls.update();
@@ -100,14 +99,14 @@ $(document).ready(function() {
     }
     // animate DirectionalLight
     scene.lights.forEach(function(light, idx){
-      if( light instanceof THREE.DirectionalLight === false )	return;
-      var ang	= 0.0005 * PIseconds * (idx % 2 ? 1 : -1);
-      light.position.set(Math.cos(ang), Math.sin(ang), Math.cos(ang*2)).normalize();							
+      if( light instanceof THREE.DirectionalLight === false )  return;
+      var ang  = 0.0005 * PIseconds * (idx % 2 ? 1 : -1);
+      light.position.set(Math.cos(ang), Math.sin(ang), Math.cos(ang*2)).normalize();
     });
     // animate PointLights
     scene.lights.forEach(function(light, idx){
-      if( light instanceof THREE.PointLight === false )	return;
-      var angle	= 0.0005 * PIseconds * (idx % 2 ? 1 : -1) + idx * Math.PI/3;
+      if( light instanceof THREE.PointLight === false )  return;
+      var angle  = 0.0005 * PIseconds * (idx % 2 ? 1 : -1) + idx * Math.PI/3;
       light.position.set(Math.cos(angle)*3, Math.sin(angle*3)*2, Math.cos(angle*2)).normalize().multiplyScalar(2);
     });
 
@@ -115,5 +114,5 @@ $(document).ready(function() {
     renderer.render( scene, camera );
   }
 
-  if( !init() )	animate();
+  if( !init() )  animate();
 });
