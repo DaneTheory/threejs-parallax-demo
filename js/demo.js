@@ -129,6 +129,7 @@ $(document).ready(function() {
   function render() {
     for (var p = 0; p < PARTICLE_COUNT; p++) {
       var particle = particles.vertices[p];
+
       if (particle.position.x - camera.position.x < -screen_range_x)
       {
         particle.position.x = camera.position.x + screen_range_x;
@@ -136,6 +137,15 @@ $(document).ready(function() {
       else if (particle.position.x - camera.position.x > screen_range_x)
       {
         particle.position.x = camera.position.x - screen_range_x;
+      }
+
+      if (particle.position.y - camera.position.y < -screen_range_y)
+      {
+        particle.position.y = camera.position.y + screen_range_y;
+      }
+      else if (particle.position.y - camera.position.y > screen_range_y)
+      {
+        particle.position.y = camera.position.y - screen_range_y;
       }
     }
 
