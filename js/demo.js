@@ -56,21 +56,27 @@ $(document).ready(function() {
     // create particles at random locations
     particles = new THREE.Geometry();
     for (var p = 0; p < PARTICLE_COUNT; p++) {
-      var pX, pY, pZ, particle;
+      var pX, pY, pZ, depthMagnitude, particle, color;
 
+      depthMagnitude = Math.random();
       pX = Math.random() * (2 * screen_range_x) - screen_range_x;
       pY = Math.random() * (2 * screen_range_y) - screen_range_y;
-      pZ = Math.random() * CAMERA_Z;
+      pZ = depthMagnitude * CAMERA_Z;
 
       particle = new THREE.Vertex(new THREE.Vector3(pX, pY, pZ));
       particles.vertices.push(particle);
+
+      // set the brightness based upon distance, closer particles are brighter
+      color = new THREE.Color();
+      color.setRGB(depthMagnitude * 2, depthMagnitude * 2, depthMagnitude * 2);
+      particles.colors.push(color);
     }
 
     // create a really basic material
     material = new THREE.ParticleBasicMaterial({
-      color: 0xffffff,
       size: 2,
-      sizeAttenuation: false
+      sizeAttenuation: false,
+      vertexColors: true
     });
 
     particleSystem = new THREE.ParticleSystem(particles, material);
