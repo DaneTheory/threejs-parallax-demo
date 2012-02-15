@@ -37,7 +37,33 @@ $(document).ready(function() {
     // put a camera in the scene
     camera  = new THREE.PerspectiveCamera(VIEW_ANGLE, window.innerWidth / window.innerHeight, NEAR, FAR);
     camera.position.set(0, 0, CAMERA_Z);
+    camera.velocity = new THREE.Vector3((Math.random() - 0.5) / 2, (Math.random() - 0.5), 0);
     scene.add(camera);
+
+    $(window).keydown(function(evt) {
+      switch (evt.keyCode) {
+        case 37:
+          if (camera.velocity.x > -0.5) {
+            camera.velocity.x -= 0.05;
+          };
+          return;
+        case 39:
+          if (camera.velocity.x < 0.5) {
+            camera.velocity.x += 0.05;
+          };
+          return;
+        case 40:
+          if (camera.velocity.y > -0.5) {
+            camera.velocity.y -= 0.05;
+          };
+          return;
+        case 38:
+          if (camera.velocity.y < 0.5) {
+            camera.velocity.y += 0.05;
+          };
+          return;
+      }
+    });
 
     // transparently support window resize
     THREEx.WindowResize.bind(renderer, camera);
@@ -113,10 +139,10 @@ $(document).ready(function() {
       }
     }
 
+    camera.position.addSelf(camera.velocity);
+
     // actually render the scene
     renderer.render( scene, camera );
-
-    camera.position.x += 0.1
   }
 
   if( !init() )  animate();
