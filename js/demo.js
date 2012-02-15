@@ -1,6 +1,14 @@
 $(document).ready(function() {
   var stats, scene, renderer, composer;
-  var camera, cameraControl;
+  var camera, cameraControl, screen_range_x, screen_range_y;
+
+  var particles, material, particleSystem, screen_range_x, screen_range_y;
+  var VIEW_ANGLE = 45,
+      NEAR = 1,
+      FAR = 100,
+      CAMERA_Z = 100,
+      PARTICLE_COUNT = 500;
+
 
   // init the scene
   function init(){
@@ -9,7 +17,7 @@ $(document).ready(function() {
         antialias: true, // to get smoother output
         preserveDrawingBuffer: true // to allow screenshot
       });
-      renderer.setClearColorHex( 0xBBBBBB, 1 );
+      renderer.setClearColorHex( 0x000000, 1 );
     }else{
       Detector.addGetWebGLMessage();
       return true;
@@ -27,12 +35,9 @@ $(document).ready(function() {
     scene = new THREE.Scene();
 
     // put a camera in the scene
-    camera  = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 1, 10000 );
-    camera.position.set(0, 0, 5);
+    camera  = new THREE.PerspectiveCamera(VIEW_ANGLE, window.innerWidth / window.innerHeight, NEAR, FAR);
+    camera.position.set(0, 0, CAMERA_Z);
     scene.add(camera);
-
-    // create a camera contol
-    cameraControls = new THREEx.DragPanControls(camera)
 
     // transparently support window resize
     THREEx.WindowResize.bind(renderer, camera);
@@ -44,29 +49,33 @@ $(document).ready(function() {
       document.getElementById('inlineDoc').innerHTML  += "- <i>f</i> for fullscreen";
     }
 
-    // here you add your objects
-    // - you will most likely replace this part by your own
-    var light  = new THREE.AmbientLight( Math.random() * 0xffffff );
-    scene.add( light );
-    var light  = new THREE.DirectionalLight( Math.random() * 0xffffff );
-    light.position.set( Math.random(), Math.random(), Math.random() ).normalize();
-    scene.add( light );
-    var light  = new THREE.DirectionalLight( Math.random() * 0xffffff );
-    light.position.set( Math.random(), Math.random(), Math.random() ).normalize();
-    scene.add( light );
-    var light  = new THREE.PointLight( Math.random() * 0xffffff );
-    light.position.set( Math.random()-0.5, Math.random()-0.5, Math.random()-0.5 )
-      .normalize().multiplyScalar(1.2);
-    scene.add( light );
-    var light  = new THREE.PointLight( Math.random() * 0xffffff );
-    light.position.set( Math.random()-0.5, Math.random()-0.5, Math.random()-0.5 )
-      .normalize().multiplyScalar(1.2);
-    scene.add( light );
+    // find max range of screen
+    screen_range_x = Math.tan(camera.fov * Math.PI / 180 * 0.5) * camera.position.z * 2;
+    screen_range_y = screen_range_x * camera.aspect;
 
-    var geometry  = new THREE.TorusGeometry( 1, 0.42, 16, 16 );
-    var material  = new THREE.MeshLambertMaterial({ambient: 0x808080, color: Math.random() * 0xffffff});
-    var mesh  = new THREE.Mesh( geometry, material );
-    scene.add( mesh );
+    // create particles at random locations
+    particles = new THREE.Geometry();
+    for (var p = 0; p < PARTICLE_COUNT; p++) {
+      var pX, pY, pZ, particle;
+
+      pX = Math.random() * (2 * screen_range_x) - screen_range_x;
+      pY = Math.random() * (2 * screen_range_y) - screen_range_y;
+      pZ = Math.random() * CAMERA_Z;
+
+      particle = new THREE.Vertex(new THREE.Vector3(pX, pY, pZ));
+      particles.vertices.push(particle);
+    }
+
+    // create a really basic material
+    material = new THREE.ParticleBasicMaterial({
+      color: 0xffffff,
+      size: 2,
+      sizeAttenuation: false
+    });
+
+    particleSystem = new THREE.ParticleSystem(particles, material);
+    particleSystem.sortParticles = true;
+    scene.add(particleSystem);
   }
 
   // animation loop
@@ -86,32 +95,22 @@ $(document).ready(function() {
 
   // render the scene
   function render() {
-    // variable which is increase by Math.PI every seconds - usefull for animation
-    var PIseconds  = Date.now() * Math.PI;
-
-    // update camera controls
-    cameraControls.update();
-
-    // animation of all objects
-    for( var i = 0; i < scene.objects.length; i ++ ){
-      scene.objects[ i ].rotation.y = PIseconds*0.0003 * (i % 2 ? 1 : -1);
-      scene.objects[ i ].rotation.x = PIseconds*0.0002 * (i % 2 ? 1 : -1);
+    for (var p = 0; p < PARTICLE_COUNT; p++) {
+      var particle = particles.vertices[p];
+      if (particle.position.x - camera.position.x < -screen_range_x)
+      {
+        particle.position.x = camera.position.x + screen_range_x;
+      }
+      else if (particle.position.x - camera.position.x > screen_range_x)
+      {
+        particle.position.x = camera.position.x - screen_range_x;
+      }
     }
-    // animate DirectionalLight
-    scene.lights.forEach(function(light, idx){
-      if( light instanceof THREE.DirectionalLight === false )  return;
-      var ang  = 0.0005 * PIseconds * (idx % 2 ? 1 : -1);
-      light.position.set(Math.cos(ang), Math.sin(ang), Math.cos(ang*2)).normalize();
-    });
-    // animate PointLights
-    scene.lights.forEach(function(light, idx){
-      if( light instanceof THREE.PointLight === false )  return;
-      var angle  = 0.0005 * PIseconds * (idx % 2 ? 1 : -1) + idx * Math.PI/3;
-      light.position.set(Math.cos(angle)*3, Math.sin(angle*3)*2, Math.cos(angle*2)).normalize().multiplyScalar(2);
-    });
 
     // actually render the scene
     renderer.render( scene, camera );
+
+    camera.position.x += 0.1
   }
 
   if( !init() )  animate();
